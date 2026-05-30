@@ -20,3 +20,7 @@ npm run check
 ```
 
 Load the repository folder as an unpacked extension from `chrome://extensions`. For automated local testing, use Chrome for Testing or Chromium; current stable Google Chrome branded builds no longer load unpacked extensions through `--load-extension`.
+
+## License
+
+MIT
