@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "Original Pin",
+  "description": "Return pinned tabs to the URL they were pinned with.",
+  "version": "0.1.0",
+  "permissions": [
+    "contextMenus",
+    "storage",
+    "tabs"
+  ],
+  "background": {
+    "service_worker": "src/service_worker.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Return pinned tab to original URL"
+  },
+  "commands": {
+    "restore-current-pinned-tab": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Y",
+        "mac": "Command+Shift+Y"
+      },
+      "description": "Return the current pinned tab to its original URL."
+    }
+  }
+}
