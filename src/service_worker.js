@@ -1,8 +1,8 @@
 import {
-  MENU_FORGET,
   MENU_RESTORE,
   MENU_SET,
-  createContextMenuSetup
+  createContextMenuSetup,
+  updateContextMenuVisibility
 } from "./context_menus.js";
 import {
   STORAGE_KEY,
@@ -18,16 +18,20 @@ const RESTORE_COMMAND = "restore-current-pinned-tab";
 
 const ensureContextMenus = createContextMenuSetup(chrome);
 
-ensureContextMenus();
+initializeContextMenus().catch((error) => {
+  console.error("Failed to initialize Original Pin context menus", error);
+});
 
 chrome.runtime.onInstalled.addListener(async () => {
   await ensureContextMenus();
   await hydrateOpenPinnedTabs();
+  await syncContextMenusForActiveTab();
 });
 
 chrome.runtime.onStartup.addListener(async () => {
   await ensureContextMenus();
   await hydrateOpenPinnedTabs();
+  await syncContextMenusForActiveTab();
 });
 
 chrome.tabs.onCreated.addListener(async (tab) => {
@@ -36,6 +40,15 @@ chrome.tabs.onCreated.addListener(async (tab) => {
   if (tab.pinned) {
     await savePinnedTab(tab);
   }
+
+  await syncContextMenusForActiveTab(tab);
+});
+
+chrome.tabs.onActivated.addListener(async (activeInfo) => {
+  await ensureContextMenus();
+
+  const tab = await chrome.tabs.get(activeInfo.tabId);
+  await syncContextMenusForActiveTab(tab);
 });
 
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
@@ -43,11 +56,13 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 
   if (changeInfo.pinned === true) {
     await savePinnedTab(tab);
+    await syncContextMenusForActiveTab(tab);
     return;
   }
 
   if (changeInfo.pinned === false) {
     await removeTabRecord(tabId);
+    await syncContextMenusForActiveTab(tab);
     return;
   }
 
@@ -59,6 +74,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 chrome.tabs.onRemoved.addListener(async (tabId) => {
   await ensureContextMenus();
   await removeTabRecord(tabId);
+  await syncContextMenusForActiveTab();
 });
 
 chrome.commands.onCommand.addListener(async (command) => {
@@ -86,6 +102,11 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     return;
   }
 
+  if (!tab.pinned) {
+    await flashBadge(tab.id, "PIN", "#8a4b00");
+    return;
+  }
+
   if (info.menuItemId === MENU_RESTORE) {
     await restoreTab(tab);
   }
@@ -95,11 +116,17 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     await flashBadge(tab.id, "SET", "#2d7d46");
   }
 
-  if (info.menuItemId === MENU_FORGET) {
-    await removeTabRecord(tab.id);
-    await flashBadge(tab.id, "OFF", "#666666");
-  }
 });
+
+async function initializeContextMenus() {
+  await ensureContextMenus();
+  await syncContextMenusForActiveTab();
+}
+
+async function syncContextMenusForActiveTab(tab = null) {
+  const activeTab = tab?.active ? tab : await getActiveTab();
+  await updateContextMenuVisibility(chrome, Boolean(activeTab?.pinned));
+}
 
 async function hydrateOpenPinnedTabs() {
   const tabs = await chrome.tabs.query({ pinned: true });

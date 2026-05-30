@@ -1,24 +1,20 @@
 export const MENU_RESTORE = "original-pin-restore";
 export const MENU_SET = "original-pin-set";
-export const MENU_FORGET = "original-pin-forget";
 
 const MENU_CONTEXTS = ["page"];
 
 const CONTEXT_MENU_ITEMS = [
   {
     id: MENU_RESTORE,
-    title: "Return pinned tab to original URL",
-    contexts: MENU_CONTEXTS
+    title: "Return to original URL",
+    contexts: MENU_CONTEXTS,
+    visible: false
   },
   {
     id: MENU_SET,
-    title: "Set original URL for pinned tab",
-    contexts: MENU_CONTEXTS
-  },
-  {
-    id: MENU_FORGET,
-    title: "Forget original URL for tab",
-    contexts: MENU_CONTEXTS
+    title: "Set current URL as original",
+    contexts: MENU_CONTEXTS,
+    visible: false
   }
 ];
 
@@ -59,9 +55,31 @@ export async function rebuildContextMenus(chromeApi) {
   }
 }
 
+export async function updateContextMenuVisibility(chromeApi, visible) {
+  await Promise.all(
+    CONTEXT_MENU_ITEMS.map((item) =>
+      updateContextMenu(chromeApi, item.id, { visible })
+    )
+  );
+}
+
 function removeAllContextMenus(chromeApi) {
   return new Promise((resolve, reject) => {
     chromeApi.contextMenus.removeAll(() => {
+      const error = chromeApi.runtime.lastError;
+      if (error) {
+        reject(new Error(error.message));
+        return;
+      }
+
+      resolve();
+    });
+  });
+}
+
+function updateContextMenu(chromeApi, id, properties) {
+  return new Promise((resolve, reject) => {
+    chromeApi.contextMenus.update(id, properties, () => {
       const error = chromeApi.runtime.lastError;
       if (error) {
         reject(new Error(error.message));

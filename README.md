@@ -8,7 +8,7 @@ Chrome extensions cannot observe `Command`/`Control` + clicks on Chrome's own ta
 - Click the extension action while a pinned tab is active.
 - Context menu entries are registered for page right-click menus.
 
-The extension also provides context menu actions to set or forget the saved original URL when the browser exposes those menu entries.
+The extension also provides a context menu action to set the current URL as the saved original URL when the browser exposes that menu entry.
 
 ## Local Development
 
