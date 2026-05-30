@@ -1,6 +1,6 @@
 # Original Pin
 
-Original Pin is a Manifest V3 Chrome extension that remembers the URL a tab had when it became pinned and lets you return that pinned tab to the remembered URL.
+Original Pin is a Chrome web extension that remembers the URL a tab had when it became pinned and lets you return that pinned tab to the remembered URL.
 
 Chrome extensions cannot observe `Command`/`Control` + clicks on Chrome's own tab strip, so this extension uses Chrome-supported triggers instead:
 

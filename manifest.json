@@ -3,6 +3,12 @@
   "name": "Original Pin",
   "description": "Return pinned tabs to the URL they were pinned with.",
   "version": "0.1.0",
+  "icons": {
+    "16": "assets/icons/icon16.png",
+    "32": "assets/icons/icon32.png",
+    "48": "assets/icons/icon48.png",
+    "128": "assets/icons/icon128.png"
+  },
   "permissions": [
     "contextMenus",
     "storage",
@@ -13,7 +19,13 @@
     "type": "module"
   },
   "action": {
-    "default_title": "Return pinned tab to original URL"
+    "default_title": "Return pinned tab to original URL",
+    "default_icon": {
+      "16": "assets/icons/icon16.png",
+      "32": "assets/icons/icon32.png",
+      "48": "assets/icons/icon48.png",
+      "128": "assets/icons/icon128.png"
+    }
   },
   "commands": {
     "restore-current-pinned-tab": {
